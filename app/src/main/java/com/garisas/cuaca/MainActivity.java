@@ -6,17 +6,23 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.Bundle;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
+
 import cz.msebera.android.httpclient.Header;
 
 public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView1;
     private SwipeRefreshLayout swipeRefreshLayout1;
+    private TextView cityTextView, sunriseTextView, sunsetTextView, totalRecordTextView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -24,6 +30,10 @@ public class MainActivity extends AppCompatActivity {
 
         recyclerView1 = findViewById(R.id.recylerView1);
         swipeRefreshLayout1 = findViewById(R.id.swipeRefreshLayout1);
+        cityTextView = findViewById(R.id.cityTextView);
+        sunriseTextView = findViewById(R.id.sunriseTextView);
+        sunsetTextView = findViewById(R.id.sunsetTextView);
+        totalRecordTextView = findViewById(R.id.totalRecordTextView);
 
         initRecyclerView1();
         initSwipeRefreshLayout();
@@ -52,6 +62,12 @@ public class MainActivity extends AppCompatActivity {
                 CuacaAdapter ca = new CuacaAdapter(rm);
                 recyclerView1.setLayoutManager(lm);
                 recyclerView1.setAdapter(ca);
+
+                CityModel city = rm.getCityModel();
+                cityTextView.setText("Kota: " + city.getName());
+                sunriseTextView.setText("Sunrise: " + formatWaktuWib(city.getSunrise()));
+                sunsetTextView.setText("Sunset: " + formatWaktuWib(city.getSunset()));
+                totalRecordTextView.setText("Total Record: " + ca.getItemCount());
             }
 
             @Override
@@ -59,5 +75,12 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    private String formatWaktuWib(long waktuUtc) {
+        Date date = new Date(waktuUtc * 1000); // convert seconds to milliseconds
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Jakarta")); // set timezone to WIB
+        return sdf.format(date);
     }
 }
